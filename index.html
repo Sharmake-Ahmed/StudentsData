@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registeration</title>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../node_modules/bootstrap-icons/font/bootstrap-icons.css">
+    <script src="../../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
+    <script>
+        $(function(){
+            
+            $("#UStudent").click(()=>{
+                var id = $("#studentID").val();
+            $.ajax({
+                method: "get",
+                url: `http://localhost:8087/details/${id}`,
+                success:(data)=>{
+                    $.each(data,(key,value)=>{
+                        $("#idd").html(value.id);
+                        $("#namee").html(value.name);
+                        $("#city").html(value.city);
+                    })
+                }
+            })
+        })
+    })
+        $(function(){
+            $("#register").click(()=>{
+            var student = {
+                Name : $("#Name").val(),
+                Age : $("#Age").val(),
+                City : $("#City").val(),
+                id : $("#id").val()
+            }
+            $.ajax({
+                method: "post",
+                url: "http://localhost:8087/registerStudent",
+                data:student
+            })
+            alert("registered successfully");
+        })
+        });
+        
+       $(function(){
+        $("#updateForm").hide();
+        $.ajax({
+            method: "get",
+            url: 'http://127.0.0.1:8087/students',
+            success:(data)=>{
+                $.each(data,(key,value)=>{
+                    $(`
+                    <tr>
+        <td>${value.name}</td>
+        <td>${value.age}</td>
+        <td>${value.city}</td>
+        <td>${value.id}</td>
+        <td><button id="btnDelete" value=${value.id} class="btn btn-danger"><span class="bi bi-trash"></span></button></td>
+        <td><button id="btnUpdate" value=${value.id} class="btn btn-success"><span class="bi bi-pen"></span></button></td>
+    </tr>`).appendTo("tbody");
+                })
+            }
+        })
+        $(document).on("click","#btnUpdate",(e)=>{
+            $("#updateForm").show();
+            $("#registerForm").hide();
+            alert(e.currentTarget.value);
+            $.ajax({
+                method:"get",
+                url:`http://localhost:8087/details/${e.currentTarget.value}`,
+                success:(data)=>{
+                    $("#updateForm").css("background-image",`url(${data[0].img})`);
+                    $("#updateID").val(data[0].id);
+                    $("#updateName").val(data[0].name);
+                    $("#updateAge").val(data[0].age);
+                    $("#updateCity").val(data[0].city);
+                    $(``).appendTo(body);
+                }
+            })
+        })
+        
+        $("#EStudent").click(()=>{
+            var id = $("#updateID").val();
+            alert(id);
+            var ids = $("#updateID").val();
+            var name = $("#updateName").val()
+            var age = $("#updateAge").val();
+            var city = $("#updateCity").val();
+            var student = {
+                id : ids,
+                name : name,
+                age : age,
+                city : city
+            }
+            $.ajax({
+                method:"put",
+                url:`http://localhost:8087/updateStudent/${id}`,
+                data:student
+            })
+            alert("student updated");
+        })
+        $(document).on("click","#btnDelete",(e)=>{
+            $.ajax({
+                method:"delete",
+                url:`http://localhost:8087/deleteStudent/${e.currentTarget.value}`
+            })
+            alert("record deleted");
+        })
+    });
+    </script>
+</head>
+<body onload="bodyload()">
+    <div class="container-fluid bg-dark w-75m-4 p-4 d-flex text-light">
+        <div class="w-50 p-4"  id="registerForm">
+            <fieldset>
+                <legend>Register a student</legend>
+                <dl>
+                    <dt>Name</dt>
+                    <dd><input type="text" id="Name" class="form-control"></dd>
+                    <dt>Age</dt>
+                    <dd><input type="Number" id="Age" class="form-control"></dd>
+                    <dt>City</dt>
+                    <dd><input type="text" id="City" class="form-control"></dd>
+                    <dt>ID</dt>
+                    <dd><input type="text" id="id" class="form-control"></dd>
+                </dl>
+                <div style="display:grid;">
+                    <button id="register" class="btn btn-primary">Register</button>
+                </div>
+            </fieldset>
+        </div>
+        <div class="w-50 p-4"  id="updateForm">
+            <fieldset>
+                <legend>Update Student</legend>
+                <dl>
+                    <dt>Name</dt>
+                    <dd><input type="text" id="updateName" class="form-control"></dd>
+                    <dt>Age</dt>
+                    <dd><input type="Number" id="updateAge" class="form-control"></dd>
+                    <dt>City</dt>
+                    <dd><input type="text" id="updateCity" class="form-control"></dd>
+                    <dt>ID</dt>
+                    <dd><input type="text" id="updateID" class="form-control "></dd>
+                </dl>
+                <div style="display:grid;">
+                    <button id="EStudent" class="btn btn-success">  Update Now </button>
+                </div>
+            </fieldset>
+        </div>
+        <div id="Students" class="w-50 p-4">
+            <table class="table">
+                <h3>Students</h3>
+                <thead class="table-head">
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>City</th>
+                    <th>ID</th>
+                </thead>
+                <tbody id="tbody" class="table-body text-light">
+                </tbody>
+                <tfoot >
+                    <div style="display:flex;" class="input-group">
+                    <span class="input-group-text">ID</span> <input type="text" id="studentID" placeholder="Put ID to Update" class="col-4 form-control w-25"><button  id="UStudent" class="btn btn-primary w-50 col-8" data-bs-target="#modal" data-bs-toggle="modal"><span class="bi bi-search text-light"></span> Search</button>
+                    </div>
+                </tfoot>
+            </table>
+            <div class="modal fade container-sml" id="modal">
+                <div class="modal-dialog" >
+                </div>
+                <button data-bs-dismiss="modal" class="btn-close" style="align-items:flex-end;"></button>
+                    <div class="modal-content bg-dark m-4" style="align-items: center;">
+                        <div class="modal-header m-4"  style="font-family: monospace; display:flex; flex: auto;"><h5>Name : </h5><h2 id="namee"></h2></div>
+                        <div class="modal-body m-4"  style="font-family: monospace; display:flex; flex: auto;"><h3>City : </h3> <h3 id="city"></h3>
+                        </div>
+                        <div class="modal-footer p-4" style="font-family: monospace; display:flex; flex: auto;" ><h5>ID : </h5><h3 id="idd"></h3></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
